@@ -4,6 +4,7 @@
 void circle();
 void turn(bool turnLeft, int times);
 void forward(int segments);
+void intersection();
 
 task main(){
 	int drive, turn, leftSpeed, rightSpeed;
@@ -17,7 +18,7 @@ task main(){
 		if (vexRT[Btn8D] == 1) { // If the circle button was pressed
 			circle();
 		}
-		else if (vexRT[Btn8R] == 1) { // Does the intersection track
+		else if (vexRT[Btn8L] == 1) { // Does the intersection track
 			intersection();
 		}
 		else { // Else, uses the remote control
@@ -54,10 +55,11 @@ task main(){
 
 void circle() {
 	motor[port8] = -20;
-	motor[port5] = 100;
-	wait1Msec(100);
+	motor[port5] = 127;
+	wait1Msec(300);
+	motor[port8] = 0;
+	motor[port5] = 0;
 }
-
 void turn(bool turnLeft, int times){
 	if (turnLeft) {
 		motor[port8] = -127;
@@ -68,24 +70,39 @@ void turn(bool turnLeft, int times){
 		motor[port5] = 127;
 		wait1Msec(250 * times);
 	}
+	motor[port8] = 0;
+	motor[port5] = 0;
 }
 
 void forward(int segments) {
 	motor[port8] = -127;
-	motor[port5] = 127 * .95;
+	motor[port5] = 127;
 	wait1Msec(500 * segments);
+	motor[port8] = 0;
+	motor[port5] = 0;
 }
 
 void intersection() {
 	forward(2);
+	wait1Msec(300);
 	turn(false, 2);
+	wait1Msec(300);
 	forward(2);
+	wait1Msec(300);
 	turn(false, 2);
-	forward(1);
+	wait1Msec(300);
+	/*forward(1);
+	wait1Msec(100);
 	turn(true, 1);
+	wait1Msec(100);
 	forward(1);
+	wait1Msec(100);
 	turn(true, 2);
+	wait1Msec(100);
 	forward(2);
+	wait1Msec(100);
 	turn(true, 2);
+	wait1Msec(100);
 	forward(1);
+	wait1Msec(100); */
 }
