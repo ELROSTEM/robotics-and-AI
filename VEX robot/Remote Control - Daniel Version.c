@@ -46,7 +46,7 @@ task main(){
 
 			// Sends the values to the motors
 			motor[port8] = rightSpeed;
-			motor[port5] = leftSpeed * .95;
+			motor[port5] = leftSpeed * .43;
 			motor[port6] = vexRT[Ch2];
 			motor[port7] = vexRT(Btn5U)*127 - vexRT(Btn6U)*127;
 		}
@@ -54,9 +54,9 @@ task main(){
 }
 
 void circle() {
-	motor[port8] = -20;
+	motor[port8] = -31;
 	motor[port5] = 127;
-	wait1Msec(300);
+	wait1Msec(100);
 	motor[port8] = 0;
 	motor[port5] = 0;
 }
@@ -64,20 +64,22 @@ void turn(bool turnLeft, int times){
 	if (turnLeft) {
 		motor[port8] = -127;
 		motor[port5] = 0;
-		wait1Msec(250 * times);
 	} else {
 		motor[port8] = 0;
 		motor[port5] = 127;
-		wait1Msec(250 * times);
 	}
+	if (times == 1) {
+		wait1Msec(750);
+	}
+	wait1Msec(530 * times);
 	motor[port8] = 0;
 	motor[port5] = 0;
 }
 
 void forward(int segments) {
 	motor[port8] = -127;
-	motor[port5] = 127;
-	wait1Msec(500 * segments);
+	motor[port5] = 127 * .43;
+	wait1Msec(700 * segments);
 	motor[port8] = 0;
 	motor[port5] = 0;
 }
@@ -91,7 +93,7 @@ void intersection() {
 	wait1Msec(300);
 	turn(false, 2);
 	wait1Msec(300);
-	/*forward(1);
+	forward(1);
 	wait1Msec(100);
 	turn(true, 1);
 	wait1Msec(100);
@@ -104,5 +106,5 @@ void intersection() {
 	turn(true, 2);
 	wait1Msec(100);
 	forward(1);
-	wait1Msec(100); */
+	wait1Msec(100);
 }
