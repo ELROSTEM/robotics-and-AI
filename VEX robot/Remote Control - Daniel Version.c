@@ -2,7 +2,7 @@
 #pragma config(Sensor, in2, channel2, sensorNone)
 
 void circle();
-void turn(bool turnLeft, int times);
+void turn(int times);
 void forward(int segments);
 void intersection();
 
@@ -60,7 +60,7 @@ void circle() {
 	motor[port8] = 0;
 	motor[port5] = 0;
 }
-void turn(bool turnLeft, int times){
+/*void turn(bool turnLeft, int times){
 	if (turnLeft) {
 		motor[port8] = -127;
 		motor[port5] = 0;
@@ -71,14 +71,22 @@ void turn(bool turnLeft, int times){
 	if (times == 1) {
 		wait1Msec(750);
 	}
-	wait1Msec(530 * times);
+	wait1Msec(540 * times);
+	motor[port8] = 0;
+	motor[port5] = 0;
+} */
+
+void turn(int times) {
+	motor[port8] = -127;
+	motor[port5] = -127;
+	wait1Msec(375 * times);
 	motor[port8] = 0;
 	motor[port5] = 0;
 }
 
 void forward(int segments) {
 	motor[port8] = -127;
-	motor[port5] = 127 * .43;
+	motor[port5] = 127 * .47;
 	wait1Msec(700 * segments);
 	motor[port8] = 0;
 	motor[port5] = 0;
@@ -87,23 +95,23 @@ void forward(int segments) {
 void intersection() {
 	forward(2);
 	wait1Msec(300);
-	turn(false, 2);
+	turn(2);
 	wait1Msec(300);
 	forward(2);
 	wait1Msec(300);
-	turn(false, 2);
+	turn(2);
 	wait1Msec(300);
 	forward(1);
 	wait1Msec(100);
-	turn(true, 1);
+	turn(2);
 	wait1Msec(100);
 	forward(1);
 	wait1Msec(100);
-	turn(true, 2);
+	turn(2);
 	wait1Msec(100);
 	forward(2);
 	wait1Msec(100);
-	turn(true, 2);
+	turn(2);
 	wait1Msec(100);
 	forward(1);
 	wait1Msec(100);
