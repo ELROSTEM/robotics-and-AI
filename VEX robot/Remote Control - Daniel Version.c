@@ -79,15 +79,20 @@ void circle() {
 void turn(int times) {
 	motor[port8] = -127;
 	motor[port5] = -127;
-	wait1Msec(375 * times);
+	if (times == 1) {
+		wait1Msec(340);
+	}
+	else if (times == 2) {
+		wait1Msec(352 * 2);
+	}
 	motor[port8] = 0;
 	motor[port5] = 0;
 }
 
 void forward(int segments) {
 	motor[port8] = -127;
-	motor[port5] = 127 * .47;
-	wait1Msec(700 * segments);
+	motor[port5] = 127 * .45;
+	wait1Msec(1000 * segments);
 	motor[port8] = 0;
 	motor[port5] = 0;
 }
@@ -101,9 +106,9 @@ void intersection() {
 	wait1Msec(300);
 	turn(2);
 	wait1Msec(300);
-	forward(1);
+	forward(1.2);
 	wait1Msec(100);
-	turn(2);
+	turn(1);
 	wait1Msec(100);
 	forward(1);
 	wait1Msec(100);
