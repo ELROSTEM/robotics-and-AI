@@ -1,14 +1,14 @@
 //Timing Initiation
 int Millis = millis();
 int prevMillis = 0;
-int forwardTime = 1000;
-int turnTime = 200;
+int forwardTime = 2000;
+int turnTime = 530;
 
 //Motor Initiation
-int motor1pin1 = 2;
-int motor1pin2 = 3;
-int motor2pin1 = 4;
-int motor2pin2 = 5;
+int motor1pin1 = 7;
+int motor1pin2 = 6;
+int motor2pin1 = 5;
+int motor2pin2 = 4;
 int speed1 = 9;
 int speed2 = 10;
 
@@ -21,15 +21,19 @@ void setup() {
   pinMode(speed1, OUTPUT);
   pinMode(speed2, OUTPUT);
   //Speed
-  analogWrite(speed1, 100);
-  analogWrite(speed2, 100);
+  analogWrite(speed1, 255);
+  analogWrite(speed2, 195);
 }
 void loop() {
   forward(1);
   left(1);
-  right(3);
   forward(1);
   left(1);
+  forward(1);
+  left(1);
+  forward(1);
+  left(1);
+  stop();
 }
 
 int forward(int loops){
@@ -43,7 +47,7 @@ int forward(int loops){
   }
 }
 
-void left(int loops){
+int right(int loops){
   for (int i = 0; i < loops; i++){
     //set direction of both motors
     digitalWrite(motor1pin1, HIGH);
@@ -53,7 +57,7 @@ void left(int loops){
     delay(turnTime); //How long it turns
   }
 }
-void right(int loops){
+int left(int loops){
   //How much it loops
   for (int i = 0; i < loops; i++){
     //set direction of both motors
@@ -63,4 +67,10 @@ void right(int loops){
     digitalWrite(motor2pin2, LOW);
     delay(turnTime); //How long it turns
   }
+}
+
+void stop(){
+  // Set speed of both motors to 0
+  analogWrite(speed1, 0);
+  analogWrite(speed2, 0);
 }
