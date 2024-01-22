@@ -11,6 +11,10 @@ const float EncoderTicksToCm = 1 / cmToEncoderTicks;
 
 
 void forward(float distance);
+void turnRight(int turns);
+void turnLeft(int turns);
+int calculateTurnEncoderValue(int degrees);
+
 
 task main()
 {
@@ -52,6 +56,9 @@ task main()
 												nMotorEncoder[rightMotor], nMotorEncoder[leftMotor], decelerationTime);
 		writeDebugStreamLine("Final right: %d. Final left: %d. Deceleration Time: %d",
 												nMotorEncoder[rightMotor] * EncoderTicksToCm, nMotorEncoder[leftMotor] * EncoderTicksToCm, decelerationTime);
+		turnRight(2);
+		turnLeft(2);
+
 }
 
 void forward(float distance) {
@@ -94,4 +101,44 @@ void forward(float distance) {
 
         wait1Msec(10);
     }
+}
+
+void turnRight(int turns) {
+	int targetEncoderValue = calculateTurnEncoderValue(45 * turns);
+	nMotorEncoder[rightMotor] = 0;
+	nMotorEncoder[leftMotor] = 0;
+
+	while (abs(nMotorEncoder[rightMotor]) < targetEncoderValue) {
+		motor[leftMotor] = 63;
+		motor[rightMotor] = -63;
+	}
+
+	motor[leftMotor] = 0;
+	motor[rightMotor] = 0;
+}
+
+void turnLeft (int turns) {
+	int targetEncoderValue = calculateTurnEncoderValue(45 * turns)
+	nMotorEncoder[rightMotor] = 0;
+	nMotorEncoder[leftMotor] = 0;
+
+	while (abs(nMotorEncoder[leftMotor]) < targetEncoderValue) {
+		motor[leftMotor] = -63;
+		motor[rightMotor] = 63;
+	}
+
+	motor[leftMotor] = 0;
+	motor[rightMotor] = 0;
+}
+
+
+int calculateTurnEncoderValue(int degrees) {
+	const float wheelTrack = 16;
+	const float wheelCircumfrence = wheelDiameter * cmToInch * 3.14159265;
+	const float robotCircumfrence = wheelTrack * 3.14159265;
+
+	float turnDistance = (robotCircumfrence * degrees) / 360;
+	int encoderTicks = turnDistance * cmToEncoderTicks;
+
+	return encoderTicks;
 }
