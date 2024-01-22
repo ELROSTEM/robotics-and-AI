@@ -9,10 +9,11 @@ const float cmToInch = 2.54; // Conversion factor from cm to inches
 const float cmToEncoderTicks = (627.2 / (wheelDiameter * cmToInch * 3.14159265)); // Calculate encoder ticks per cm
 
 void forward(float distance) {
-    writeDebugStreamLine("STARTING");
-    int targetEncoderValue = distance * cmToEncoderTicks;
-    writeDebugStreamLine("target %d", targetEncoderValue);
-    int basePower = 63; // Base power for the motors
+    writeDebugStreamLine("Moving Forward");
+
+    int targetEncoderValue = distance * cmToEncoderTicks; // May want to make a target left / right encoder
+    writeDebugStreamLine("Target encoder value: %d", targetEncoderValue);
+    int basePower = 100; // Base power for the motors (original was 63)
 
     // PID constants
     const float Kp = 0.85; // Proportional gain, adjust as necessary
@@ -20,6 +21,7 @@ void forward(float distance) {
     const float Ki = 0;
     const float Kd = 0;
 
+    clearTimer(T1);
     while (true) {
         int leftEncoderValue = getMotorEncoder(leftMotor);
         int rightEncoderValue = getMotorEncoder(rightMotor);
@@ -34,18 +36,17 @@ void forward(float distance) {
         motor[leftMotor] = basePower - correction; // Decrease speed if left motor is ahead
         motor[rightMotor] = basePower + correction; // Increase speed if left motor is ahead
 
-        writeDebugStreamLine("Right Encoder: %d", rightEncoderValue);
-        writeDebugStreamLine("Left Encoder: %d", leftEncoderValue);
-        writeDebugStreamLine("Encoder Distance: %d", driftError);
+        writeDebugStreamLine("Right: %d. Left: %d. Difference: %d", rightEncoderValue, leftEncoderValue, driftError);
 
         // Exit condition: when the target distance is reached
         if (abs(leftEncoderValue) >= targetEncoderValue && abs(rightEncoderValue) >= targetEncoderValue) {
             motor[rightMotor] = 0;
             motor[leftMotor] = 0;
+            writeDebugStreamLine("Finish time: %d", time1[T1]);
             break;
         }
 
-        wait1Msec(50);
+        wait1Msec(10);
     }
 }
 
@@ -56,15 +57,37 @@ task main()
     // Reset the encoders
     nMotorEncoder[rightMotor] = 0;
     nMotorEncoder[leftMotor] = 0;
+
 		forward(50);
 
-    while(true)
-    {
-        // Display the encoder values
-        writeDebugStreamLine("Done Right Encoder: %d", nMotorEncoder[rightMotor]);
-        writeDebugStreamLine("Done Left Encoder: %d", nMotorEncoder[leftMotor]);
+		// Calculate deceleration time
+		clearTimer(T2);
+		int initialLeftCount = nMotorEncoder[leftMotor];
+		int initialRightCount = nMotorEncoder[rightMotor];
+		int threshold = 5;
+		bool leftStopped = false;
+		bool rightStopped = false;
 
-        // Small delay to make the output readable
-        wait1Msec(1000);
-    }
+		while (!leftStopped || !rightStopped) { // While either motor is moving
+			wait1Msec(10);
+
+			if (!leftStopped) { // Checks every loop if the left motor stopped
+				int currentLeftCount = nMotorEncoder[leftMotor];
+				if (abs(currentLeftCount - initialLeftCount) <= threshold) {
+					leftStopped = true;
+				}
+				initialLeftCount = currentLeftCount;
+			}
+			if (!rightStopped) { // Checks every loop if the right motor stopped
+				int currentRightCount = nMotorEncoder[rightMotor];
+				if (abs(currentRightCount - initialRightCount) <= threshold) {
+					rightStopped = true;
+				}
+				initialRightCount = currentRightCount;
+			}
+		}
+
+		int decelerationTime = time1[T2];
+		writeDebugStreamLine("Final right: %d. Final left: %d. Deceleration Time: %d",
+												nMotorEncoder[rightMotor], nMotorEncoder[leftMotor], decelerationTime);
 }
