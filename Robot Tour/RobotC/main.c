@@ -15,7 +15,8 @@ void forward(float distance);
 void turnRight(int turns);
 void turnLeft(int turns);
 int calculateTurnEncoderValue(int degrees);
-
+void left (int turns);
+void right (int turns);
 
 task main()
 {
@@ -55,10 +56,22 @@ task main()
 												nMotorEncoder[rightMotor], nMotorEncoder[leftMotor], decelerationTime);
 		writeDebugStreamLine("Final right: %d. Final left: %d. Deceleration Time: %d",
 												nMotorEncoder[rightMotor] * EncoderTicksToCm, nMotorEncoder[leftMotor] * EncoderTicksToCm, decelerationTime);*/
-		turnRight(1);
+		forward(50);
+		right(1);
+		wait1Msec(1000);
+		forward(50);
+		right(1);
+		wait1Msec(1000);
+		forward(50);
+		right(1);
+		wait1Msec(1000);
+		forward(50);
+		right(1);
 }
 
 void forward(float distance) {
+		nMotorEncoder[rightMotor] = 0;
+    nMotorEncoder[leftMotor] = 0;
     writeDebugStreamLine("Moving Forward");
 
     int targetEncoderValue = distance * cmToEncoderTicks; // May want to make a target left / right encoder
@@ -66,7 +79,7 @@ void forward(float distance) {
     int basePower = 100; // Base power for the motors (original was 63)
 
     // PID constants
-    const float Kp = 0.85; // Proportional gain, adjust as necessary
+    const float Kp = 10; // Proportional gain, adjust as necessary
     // Integral and Derivative gains are set to 0 for now, focus on tuning Kp first
     const float Ki = 0;
     const float Kd = 0;
@@ -127,6 +140,21 @@ void turnLeft (int turns) {
 	motor[rightMotor] = 0;
 }
 
+void right(int turns) {
+	motor[leftMotor] = 63;
+	motor[rightMotor] = -63;
+	delay(199);
+	motor[leftMotor] = 0;
+	motor[rightMotor] = -0;
+}
+
+void left (int turns) {
+	motor[leftMotor] = -63;
+	motor[rightMotor] = 63;
+	delay(273);
+	motor[leftMotor] = 0;
+	motor[rightMotor] = -0;
+}
 
 int calculateTurnEncoderValue(int degrees) {
 	const float wheelTrack = 16;

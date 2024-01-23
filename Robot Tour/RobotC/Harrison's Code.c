@@ -9,10 +9,6 @@ const float wheelDiameter = 4; // Wheel diameter in inches
 const float cmToInch = 2.54; // Conversion factor from cm to inches
 const float cmToEncoderTicks = (627.2 / (wheelDiameter * cmToInch * 3.14159265)); // Calculate encoder ticks per cm
 const float EncoderTicksToCm = 1 / cmToEncoderTicks;
-int prevTargetEncoderValue = 0;
-int leftEncoderDeviant = 0;
-int rightEncoderDeviant = 0;
-bool firstLoop = true;
 void forward(float distance);
 void right(int turns);
 void left(int turns);
@@ -57,16 +53,17 @@ task main()
 		writeDebugStreamLine("Final right: %d. Final left: %d. Deceleration Time: %d",
 												nMotorEncoder[rightMotor] * EncoderTicksToCm, nMotorEncoder[leftMotor] * EncoderTicksToCm, decelerationTime);*/
 		forward(50);
-
 }
 
 void forward(float distance) {
-    writeDebugStreamLine("Moving Forward");
+		//reset Motor
+		nMotorEncoder[rightMotor] = 0;
+    nMotorEncoder[leftMotor] = 0;
 
+    writeDebugStreamLine("Moving Forward");
     int targetEncoderValue = distance * cmToEncoderTicks; // May want to make a target left / right encoder
     writeDebugStreamLine("Target encoder value: %d", targetEncoderValue);
     int basePower = 127; // Base power for the motors (original was 63)
-
     // PID constants
     const float Kp = 16; // Proportional gain, adjust as necessary
     // Integral and Derivative gains are set to 0 for now, focus on tuning Kp first
@@ -74,16 +71,8 @@ void forward(float distance) {
     clearTimer(T1);
     while (true) {
 
-        int leftEncoderValue = getMotorEncoder(leftMotor) + prevTargetEncoderValue;
-        int rightEncoderValue = getMotorEncoder(rightMotor) + prevTargetEncoderValue;
-        if (firstLoop == true){
-            leftEncoderDeviant = leftEncoderValue * -1;
-						rightEncoderDeviant = rightEncoderValue * -1;
-         }
-        firstLoop = false;
-
-        leftEncoderValue = getMotorEncoder(leftMotor) + prevTargetEncoderValue + leftEncoderDeviant;
-        rightEncoderValue = getMotorEncoder(rightMotor) + prevTargetEncoderValue + rightEncoderDeviant;
+        int leftEncoderValue = getMotorEncoder(leftMotor);
+        int rightEncoderValue = getMotorEncoder(rightMotor);
 
         // Calculate the drift error (difference in encoder values)
         int driftError = leftEncoderValue - rightEncoderValue;
@@ -101,9 +90,6 @@ void forward(float distance) {
         if (abs(leftEncoderValue) >= targetEncoderValue && abs(rightEncoderValue) >= targetEncoderValue) {
             motor[rightMotor] = 0;
             motor[leftMotor] = 0;
-            writeDebugStreamLine("Finish time: %d", time1[T1]);
-            prevTargetEncoderValue = targetEncoderValue;
-            firstLoop = true;
             break;
         }
         wait1Msec(10);
@@ -114,11 +100,11 @@ void right (int turns) {
 	for (int i = 0; i < turns; i++){
 		motor[leftMotor] = 63;
 		motor[rightMotor] = -63;
-		delay(272);
+		delay(230);
 		motor[leftMotor] = 0;
 		motor[rightMotor] = 0;
 	}
-	delay(400);
+	delay(1000);
 }
 
 void left (int turns) {
@@ -129,5 +115,5 @@ void left (int turns) {
 		motor[leftMotor] = 0;
 		motor[rightMotor] = 0;
 	}
-	delay(400);
+	delay(1000);
 }
