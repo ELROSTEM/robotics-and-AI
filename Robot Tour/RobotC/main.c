@@ -32,14 +32,15 @@ task main()
 
   // Place instructions here
   turnRight(1);
+  int rightDecelerationTime = calculateDecelerationTime();
   wait1Msec(1000);
   turnLeft(1);
-	int decelerationTime = calculateDecelerationTime();
+	int leftDecelerationTime = calculateDecelerationTime();
 
-	writeDebugStreamLine("Final right: %d. Final left: %d. Deceleration Time: %d",
-											nMotorEncoder[rightMotor], nMotorEncoder[leftMotor], decelerationTime);
-	writeDebugStreamLine("Final right: %d. Final left: %d. Deceleration Time: %d",
-											nMotorEncoder[rightMotor] * EncoderTicksToCm, nMotorEncoder[leftMotor] * EncoderTicksToCm, decelerationTime);
+	writeDebugStreamLine("Final right: %d. Final left: %d. Left Deceleration Time: %d. Right Deceleration Time: %d",
+											nMotorEncoder[rightMotor], nMotorEncoder[leftMotor], leftDecelerationTime, rightDecelerationTime);
+	writeDebugStreamLine("Final right: %d. Final left: %d. Left Deceleration Time: %d, Right Deceleration Time: %d",
+											nMotorEncoder[rightMotor] * EncoderTicksToCm, nMotorEncoder[leftMotor] * EncoderTicksToCm, leftDecelerationTime, rightDecelerationTime);
 }
 
 // Go forward function
