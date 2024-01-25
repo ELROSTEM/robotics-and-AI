@@ -7,7 +7,7 @@
 
 // Initialize constants
 const float wheelDiameter = 4; // Wheel diameter in inches
-const float wheelSeperation = 15.5; // Distance in CM between left and right wheels
+const float wheelSeperation = 12; // Distance in CM between left and right wheels
 const float cmToInch = 2.54; // Conversion factor from cm to inches
 const float cmToEncoderTicks = (627.2 / (wheelDiameter * cmToInch * 3.14159265)); // Calculate encoder ticks per cm
 const float EncoderTicksToCm = 1 / cmToEncoderTicks;
@@ -21,38 +21,36 @@ void turnLeft(int turns);
 int calculateTurnEncoderValue(int degrees);
 void left (int turns);
 void right (int turns);
-int calculateDecelerationTime(char* direction);
+int calculateDecelerationTime();
 
 task main()
 {
-	writeDebugStreamLine("\nProgram Started");
+	writeDebugStreamLine("Program Started");
   // Reset the encoders
   nMotorEncoder[rightMotor] = 0;
   nMotorEncoder[leftMotor] = 0;
 
   // Place instructions here
-  /*turnRight(1);
-  int rightDecelerationTime = calculateDecelerationTime("right");
-  wait1Msec(1000);
-  turnLeft(1);
-	int leftDecelerationTime = calculateDecelerationTime("left");*/
-	forward(1);
-	/*int forwardDecelerationTime = calculateDecelerationTime("forward");
+  right(1);
 
-	writeDebugStreamLine("Final right: %d. Final left: %d. Left Deceleration Time: %d. Right Deceleration Time: %d Forward Deceleration Time: %d",
-											nMotorEncoder[rightMotor], nMotorEncoder[leftMotor], leftDecelerationTime, rightDecelerationTime, forwardDecelerationTime);
-	writeDebugStreamLine("Final right: %d. Final left: %d. Left Deceleration Time: %d, Right Deceleration Time: %d Right Deceleration Time: %d Forward Deceleration Time: %d",
-											nMotorEncoder[rightMotor] * EncoderTicksToCm, nMotorEncoder[leftMotor] * EncoderTicksToCm, leftDecelerationTime, rightDecelerationTime, forwardDecelerationTime);*/
+	int decelerationTime = calculateDecelerationTime();
+
+	writeDebugStreamLine("Final right: %d. Final left: %d. Deceleration Time: %d",
+											nMotorEncoder[rightMotor], nMotorEncoder[leftMotor], decelerationTime);
+	writeDebugStreamLine("Final right: %d. Final left: %d. Deceleration Time: %d",
+											nMotorEncoder[rightMotor] * EncoderTicksToCm, nMotorEncoder[leftMotor] * EncoderTicksToCm, decelerationTime);
 }
 
 // Go forward function
 void forward(float distance) {
-			writeDebugStreamLine("\nMoving Forward");
+			writeDebugStreamLine("Moving Forward");
 
 			nMotorEncoder[rightMotor] = 0;
 	    nMotorEncoder[leftMotor] = 0;
-
 	    int targetEncoderValue = distance * cmToEncoderTicks - 200; // May want to make a target left / right encoder
+			if (distance == 10) {
+				targetEncoderValue = targetEncoderValue + 100;
+			}
 	    //writeDebugStreamLine("Target encoder value: %d", targetEncoderValue);
 	    int basePower = 100; // Base power for the motors (original was 63)
 
@@ -80,6 +78,7 @@ void forward(float distance) {
 	        if (abs(leftEncoderValue) >= targetEncoderValue && abs(rightEncoderValue) >= targetEncoderValue) {
 	            motor[rightMotor] = 0;
 	            motor[leftMotor] = 0;
+	            wait1Msec(1000);
 	            break;
 	        }
 	        wait1Msec(10);
@@ -88,7 +87,7 @@ void forward(float distance) {
 
 // Main right turn function
 void turnRight(int turns) {
-		writeDebugStreamLine("\nTurning Right");
+		writeDebugStreamLine("Turning Right");
 
     int targetEncoderValue = turnDistance * turns;
     nMotorEncoder[rightMotor] = 0;
@@ -111,12 +110,13 @@ void turnRight(int turns) {
         // Apply correction asymmetrically
         motor[leftMotor] = 30 - correction;  // Adjust speed of left motor
         motor[rightMotor] = -30 + correction; // Adjust speed of right motor (note the negative sign)
-				//Print data
-        writeDebugStreamLine("Right: %d. Left: %d. Difference: %d Correction: %d", rightEncoderValue, leftEncoderValue, driftError, correction);
+
         // Exit condition: when the target turn is reached
         if (abs(leftEncoderValue) >= targetEncoderValue && abs(rightEncoderValue) >= targetEncoderValue) {
             motor[rightMotor] = 0;
             motor[leftMotor] = 0;
+            writeDebugStreamLine("Right: %d. Left: %d. Difference: %d Correction: %d", rightEncoderValue, leftEncoderValue, driftError, correction);
+            wait1Msec(1000);
             break;
         }
 
@@ -126,8 +126,6 @@ void turnRight(int turns) {
 
 
 void turnLeft(int turns) {
-		writeDebugStreamLine("\nTurning Left");
-
     int targetEncoderValue = turnDistance * turns;
     nMotorEncoder[rightMotor] = 0;
     nMotorEncoder[leftMotor] = 0;
@@ -149,12 +147,13 @@ void turnLeft(int turns) {
         // Apply correction asymmetrically
         motor[rightMotor] = 30 - correction;  // Adjust speed of left motor
         motor[leftMotor] = -30 + correction; // Adjust speed of right motor (note the negative sign)
-        //Print data
-				writeDebugStreamLine("Right: %d. Left: %d. Difference: %d Correction: %d", rightEncoderValue, leftEncoderValue, driftError, correction);
+
         // Exit condition: when the target turn is reached
         if (abs(rightEncoderValue) >= targetEncoderValue && abs(leftEncoderValue) >= targetEncoderValue) {
             motor[rightMotor] = 0;
             motor[leftMotor] = 0;
+            writeDebugStreamLine("Right: %d. Left: %d. Difference: %d Correction: %d", rightEncoderValue, leftEncoderValue, driftError, correction);
+            wait1Msec(1000);
             break;
         }
 
@@ -170,74 +169,107 @@ int calculateTurnEncoderValue(int degrees) {
 }
 
 // Times how long it takes the robot to decelerate after running a function
-int calculateDecelerationTime(char* direction) {
+int calculateDecelerationTime() {
 		clearTimer(T2);
 		int initialLeftCount = nMotorEncoder[leftMotor];
 		int initialRightCount = nMotorEncoder[rightMotor];
-
 		int threshold = 5;
 		bool rightStopped = false;
 		bool leftStopped = false;
-		if (strcmp(direction, "left") == 0){
-			while (!leftStopped) { // While left motor is moving
-				if (!leftStopped) { // Checks every loop if the left motor stopped
-					int currentLeftCount = nMotorEncoder[leftMotor];
-					if (abs(currentLeftCount - initialLeftCount) <= threshold){
-						leftStopped = true;
-						initialLeftCount = currentLeftCount;
-					}
+
+		while (!leftStopped || !rightStopped) { // While either motor is moving
+			wait1Msec(10);
+
+			if (!leftStopped) { // Checks every loop if the left motor stopped
+				int currentLeftCount = nMotorEncoder[leftMotor];
+				if (abs(currentLeftCount - initialLeftCount) <= threshold) {
+					leftStopped = true;
 				}
-		  }
-	} else if (strcmp(direction, "right") == 0){
-				while (!rightStopped) { // While either motor is moving
-						if (!rightStopped) { // Checks every loop if the right motor stopped
-							int currentRightCount = nMotorEncoder[rightMotor];
-							if (abs(currentRightCount - initialRightCount) <= threshold) {
-								rightStopped = true;
-								initialRightCount = currentRightCount;
-							}
-						}
-				}
-	}else if (strcmp(direction, "forward") == 0){
-			while (!leftStopped || !rightStopped) { // While either motor is moving
-				if (!leftStopped) { // Checks every loop if the left motor stopped
-						int currentLeftCount = nMotorEncoder[leftMotor];
-						if (abs(currentLeftCount - initialLeftCount) <= threshold) {
-							leftStopped = true;
-						}
-						initialLeftCount = currentLeftCount;
-					}
-					if (!rightStopped) { // Checks every loop if the right motor stopped
-						int currentRightCount = nMotorEncoder[rightMotor];
-						if (abs(currentRightCount - initialRightCount) <= threshold) {
-							rightStopped = true;
-						}
-						initialRightCount = currentRightCount;
-					}
+				initialLeftCount = currentLeftCount;
 			}
-	}else {
-		 	writeDebugStreamLine("Hey, you didn't write the correct input for the calculateDecelerationTime.");
-		 	writeDebugStreamLine("You might've wrote Left instead of left, or vice versa. The only inputs");
-		 	writeDebugStreamLine("for this function should be \"right\" and \"left\".\n");
-	}
-	int decelerationTime = time1[T2];
-	return decelerationTime;
+			if (!rightStopped) { // Checks every loop if the right motor stopped
+				int currentRightCount = nMotorEncoder[rightMotor];
+				if (abs(currentRightCount - initialRightCount) <= threshold) {
+					rightStopped = true;
+				}
+				initialRightCount = currentRightCount;
+			}
+		}
+
+		int decelerationTime = time1[T2];
+		return decelerationTime;
 }
 
 // Backup turn left function
 void right(int turns) {
-	motor[leftMotor] = 63;
-	motor[rightMotor] = -63;
-	delay(273);
-	motor[leftMotor] = 0;
-	motor[rightMotor] = -0;
+		writeDebugStreamLine("Turning Right");
+
+    int targetEncoderValue = turnDistance * turns - 25;
+    nMotorEncoder[rightMotor] = 0;
+    nMotorEncoder[leftMotor] = 0;
+
+    // PID constants
+
+    // Correct for drift until it reaches target distance on each wheel
+    while (true) {
+        int leftEncoderValue = getMotorEncoder(leftMotor);
+        int rightEncoderValue = getMotorEncoder(rightMotor);
+
+        // Calculate the drift error (difference in encoder values)
+        int driftError = leftEncoderValue + rightEncoderValue; // Adjusted for turning right
+
+        // Proportional control for drift correction
+        int correction = driftError;
+
+        // Apply correction asymmetrically
+        motor[leftMotor] = 30 - correction;  // Adjust speed of left motor
+        motor[rightMotor] = -30 + correction; // Adjust speed of right motor (note the negative sign)
+
+        // Exit condition: when the target turn is reached
+        if (abs(leftEncoderValue) >= targetEncoderValue && abs(rightEncoderValue) >= targetEncoderValue) {
+            motor[rightMotor] = 0;
+            motor[leftMotor] = 0;
+            writeDebugStreamLine("Right: %d. Left: %d. Difference: %d Correction: %d", rightEncoderValue, leftEncoderValue, driftError, correction);
+            wait1Msec(1000);
+            break;
+        }
+
+        wait1Msec(10);
+    }
 }
 
 // Backup turn right function
 void left (int turns) {
-	motor[leftMotor] = -63;
-	motor[rightMotor] = 63;
-	delay(273);
-	motor[leftMotor] = 0;
-	motor[rightMotor] = -0;
+	int targetEncoderValue = turnDistance * turns + 200;
+    nMotorEncoder[rightMotor] = 0;
+    nMotorEncoder[leftMotor] = 0;
+
+    // PID constants
+
+    // Correct for drift until it reaches target distance on each wheel
+    while (true) {
+        int leftEncoderValue = getMotorEncoder(leftMotor);
+        int rightEncoderValue = getMotorEncoder(rightMotor);
+
+        // Calculate the drift error (difference in encoder values)
+        int driftError = leftEncoderValue + rightEncoderValue; // Adjusted for turning right
+
+        // Proportional control for drift correction
+        int correction = driftError;
+
+        // Apply correction asymmetrically
+        motor[rightMotor] = 30 - correction;  // Adjust speed of left motor
+        motor[leftMotor] = -30 + correction; // Adjust speed of right motor (note the negative sign)
+
+        // Exit condition: when the target turn is reached
+        if (abs(rightEncoderValue) >= targetEncoderValue && abs(leftEncoderValue) >= targetEncoderValue) {
+            motor[rightMotor] = 0;
+            motor[leftMotor] = 0;
+            writeDebugStreamLine("Right: %d. Left: %d. Difference: %d Correction: %d", rightEncoderValue, leftEncoderValue, driftError, correction);
+            wait1Msec(1000);
+            break;
+        }
+
+        wait1Msec(10);
+    }
 }
