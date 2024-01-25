@@ -31,7 +31,7 @@ task main()
   nMotorEncoder[leftMotor] = 0;
 
   // Place instructions here
-  right(1);
+  left(1);
 
 	int decelerationTime = calculateDecelerationTime();
 
@@ -204,7 +204,7 @@ int calculateDecelerationTime() {
 void right(int turns) {
 		writeDebugStreamLine("Turning Right");
 
-    int targetEncoderValue = turnDistance * turns - 25;
+    int targetEncoderValue = turnDistance * turns+10;
     nMotorEncoder[rightMotor] = 0;
     nMotorEncoder[leftMotor] = 0;
 
@@ -238,9 +238,10 @@ void right(int turns) {
     }
 }
 
-// Backup turn right function
-void left (int turns) {
-	int targetEncoderValue = turnDistance * turns + 200;
+void left(int turns) {
+		writeDebugStreamLine("Turning Right");
+
+    int targetEncoderValue = turnDistance * turns+10;
     nMotorEncoder[rightMotor] = 0;
     nMotorEncoder[leftMotor] = 0;
 
@@ -258,11 +259,11 @@ void left (int turns) {
         int correction = driftError;
 
         // Apply correction asymmetrically
-        motor[rightMotor] = 30 - correction;  // Adjust speed of left motor
-        motor[leftMotor] = -30 + correction; // Adjust speed of right motor (note the negative sign)
+        motor[leftMotor] = -30 - correction;  // Adjust speed of left motor
+        motor[rightMotor] = 30 + correction; // Adjust speed of right motor (note the negative sign)
 
         // Exit condition: when the target turn is reached
-        if (abs(rightEncoderValue) >= targetEncoderValue && abs(leftEncoderValue) >= targetEncoderValue) {
+        if (abs(leftEncoderValue) >= targetEncoderValue && abs(rightEncoderValue) >= targetEncoderValue) {
             motor[rightMotor] = 0;
             motor[leftMotor] = 0;
             writeDebugStreamLine("Right: %d. Left: %d. Difference: %d Correction: %d", rightEncoderValue, leftEncoderValue, driftError, correction);
