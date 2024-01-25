@@ -30,8 +30,23 @@ task main()
   nMotorEncoder[rightMotor] = 0;
   nMotorEncoder[leftMotor] = 0;
 
-  // Place instructions here
+  // Place instructions left
+  forward(10);
   left(1);
+  forward(50);
+  right(1);
+  forward(50);
+  right(1);
+  forward(50);
+  left(1);
+  forward(50);
+  left(1);
+  forward(50);
+  right(1);
+  forward(50);
+  right(1);
+  forward(50)
+
 
 	int decelerationTime = calculateDecelerationTime();
 
@@ -47,7 +62,7 @@ void forward(float distance) {
 
 			nMotorEncoder[rightMotor] = 0;
 	    nMotorEncoder[leftMotor] = 0;
-	    int targetEncoderValue = distance * cmToEncoderTicks - 200; // May want to make a target left / right encoder
+	    int targetEncoderValue = distance * cmToEncoderTicks - 250; // May want to make a target left / right encoder
 			if (distance == 10) {
 				targetEncoderValue = targetEncoderValue + 100;
 			}
@@ -126,7 +141,7 @@ void turnRight(int turns) {
 
 
 void turnLeft(int turns) {
-    int targetEncoderValue = turnDistance * turns;
+    int targetEncoderValue = turnDistance * turns -10;
     nMotorEncoder[rightMotor] = 0;
     nMotorEncoder[leftMotor] = 0;
 
@@ -204,7 +219,7 @@ int calculateDecelerationTime() {
 void right(int turns) {
 		writeDebugStreamLine("Turning Right");
 
-    int targetEncoderValue = turnDistance * turns+10;
+    int targetEncoderValue = turnDistance * turns-30;
     nMotorEncoder[rightMotor] = 0;
     nMotorEncoder[leftMotor] = 0;
 
@@ -241,7 +256,7 @@ void right(int turns) {
 void left(int turns) {
 		writeDebugStreamLine("Turning Right");
 
-    int targetEncoderValue = turnDistance * turns+10;
+    int targetEncoderValue = turnDistance * turns-5;
     nMotorEncoder[rightMotor] = 0;
     nMotorEncoder[leftMotor] = 0;
 
@@ -259,10 +274,10 @@ void left(int turns) {
         int correction = driftError;
 
         // Apply correction asymmetrically
-        motor[leftMotor] = -30 - correction;  // Adjust speed of left motor
-        motor[rightMotor] = 30 + correction; // Adjust speed of right motor (note the negative sign)
+        motor[rightMotor] = 30 - correction;  // Adjust speed of left motor
+        motor[leftMotor] = -30 + correction; // Adjust speed of right motor (note the negative sign)
 
-        // Exit condition: when the target turn is reached
+        // it condition: when the target turn is reached
         if (abs(leftEncoderValue) >= targetEncoderValue && abs(rightEncoderValue) >= targetEncoderValue) {
             motor[rightMotor] = 0;
             motor[leftMotor] = 0;
