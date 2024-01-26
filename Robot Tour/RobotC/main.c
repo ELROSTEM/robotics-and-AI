@@ -40,6 +40,7 @@ int motorMultiplerMaker (int forwards, int lefts, int rights, int expectedTime);
 
 task main()
 {
+<<<<<<< Updated upstream
 	clearTimer(T2);
 	writeDebugStreamLine("Program Started");
   // Reset the encoders
@@ -69,6 +70,15 @@ task main()
   forward(50);
   right(1);
   forward(50);
+=======
+	writeDebugStreamLine("\nProgram Started");
+  // Reset the encoders
+  nMotorEncoder[rightMotor] = 0;
+  nMotorEncoder[leftMotor] = 0;
+
+  // Place instructions here
+  right(1);
+>>>>>>> Stashed changes
 
 
 
@@ -85,8 +95,12 @@ task main()
 
 // Go forward function
 void forward(float distance) {
+<<<<<<< Updated upstream
 			clearTimer(T1);
 			writeDebugStreamLine("Moving Forward");
+=======
+			writeDebugStreamLine("\nMoving Forward");
+>>>>>>> Stashed changes
 
 			nMotorEncoder[rightMotor] = 0;
 	    nMotorEncoder[leftMotor] = 0;
@@ -170,10 +184,16 @@ int calculateTurnEncoderValue(int degrees) {
 
 // Backup turn left function
 void right(int turns) {
+<<<<<<< Updated upstream
 		clearTimer(T3);
 		writeDebugStreamLine("Turning Right");
 
     int targetEncoderValue = turnDistance * turns +15;//-20 for 9v
+=======
+		writeDebugStreamLine("\nTurning Right");
+
+    int targetEncoderValue = turnDistance * turns+30;
+>>>>>>> Stashed changes
     nMotorEncoder[rightMotor] = 0;
     nMotorEncoder[leftMotor] = 0;
 
@@ -209,10 +229,16 @@ void right(int turns) {
 }
 
 void left(int turns) {
+<<<<<<< Updated upstream
 		clearTimer(T4);
 		writeDebugStreamLine("Turning Right");
 
     int targetEncoderValue = turnDistance * turns-45//-65 for 9v
+=======
+		writeDebugStreamLine("\nTurning Left");
+
+    int targetEncoderValue = turnDistance * turns+30;
+>>>>>>> Stashed changes
     nMotorEncoder[rightMotor] = 0;
     nMotorEncoder[leftMotor] = 0;
 
@@ -230,6 +256,7 @@ void left(int turns) {
         int correction = driftError * Kp;
 
         // Apply correction asymmetrically
+<<<<<<< Updated upstream
         motor[rightMotor] = 30 - correction;  // Adjust speed of left motor
         motor[leftMotor] = -30 + correction; // Adjust speed of right motor (note the negative sign)
             //writeDebugStreamLine("Right: %d. Left: %d. Difference: %d Correction: %d", rightEncoderValue, leftEncoderValue, driftError, correction);
@@ -238,6 +265,15 @@ void left(int turns) {
             motor[rightMotor] = 0;
             motor[leftMotor] = 0;
 						writeDebugStreamLine("LeftTime: %d", time1(T4));
+=======
+        motor[leftMotor] = -30 - correction;  // Adjust speed of left motor
+        motor[rightMotor] = 30 + correction; // Adjust speed of right motor (note the negative sign)
+				writeDebugStreamLine("Right: %d. Left: %d. Difference: %d Correction: %d", rightEncoderValue, leftEncoderValue, driftError, correction);
+        // Exit condition: when the target turn is reached
+        if (abs(leftEncoderValue) >= targetEncoderValue && abs(rightEncoderValue) >= targetEncoderValue) {
+            motor[rightMotor] = 0;
+            motor[leftMotor] = 0;
+>>>>>>> Stashed changes
             wait1Msec(1000);
             break;
         }
