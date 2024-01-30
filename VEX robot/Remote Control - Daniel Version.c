@@ -136,9 +136,38 @@ void intersection() {
 void lineTracker(){
 	bool finished = false;
 	while (!finished){
-		writeDebugStreamLine("leftTracker: %d", SensorValue[leftTracker]);
-		writeDebugStreamLine("centerTracker: %d", SensorValue[centerTracker]);
-		writeDebugStreamLine("rightTracker: %d", SensorValue[rightTracker]);
-		delay(1000);
+		if(SensorValue[leftTracker] > 2800 && SensorValue[centerTracker] < 2800 && SensorValue[rightTracker] > 2800){
+			motor[rightMotor] = 63;
+			motor[leftMotor] = 63;
+			writeDebugStreamLine("\nMoving Forward");
+			writeDebugStreamLine("leftTracker: %d", SensorValue[leftTracker]);
+			writeDebugStreamLine("centerTracker: %d", SensorValue[centerTracker]);
+			writeDebugStreamLine("rightTracker: %d", SensorValue[rightTracker]);
+		}
+		if(SensorValue[leftTracker] < 2800 && SensorValue[centerTracker] > 2800 && SensorValue[rightTracker] > 2800){
+			motor[rightMotor] = 63;
+			motor[leftMotor] = 0;
+			writeDebugStreamLine("\nTurning Left");
+			writeDebugStreamLine("leftTracker: %d", SensorValue[leftTracker]);
+			writeDebugStreamLine("centerTracker: %d", SensorValue[centerTracker]);
+			writeDebugStreamLine("rightTracker: %d", SensorValue[rightTracker]);
+		}
+		if(SensorValue[leftTracker] > 2800 && SensorValue[centerTracker] > 2800 && SensorValue[rightTracker] < 2800){
+			motor[rightMotor] = 0;
+			motor[leftMotor] = 63;
+			writeDebugStreamLine("\nTurning Right");
+			writeDebugStreamLine("leftTracker: %d", SensorValue[leftTracker]);
+			writeDebugStreamLine("centerTracker: %d", SensorValue[centerTracker]);
+			writeDebugStreamLine("rightTracker: %d", SensorValue[rightTracker]);
+		}
+		while(SensorValue[leftTracker] > 2800 && SensorValue[centerTracker] > 2800 && SensorValue[rightTracker] > 2800){
+			motor[rightMotor] = 0;
+			motor[leftMotor] = 0;
+			writeDebugStreamLine("\nTurning Off");
+			writeDebugStreamLine("leftTracker: %d", SensorValue[leftTracker]);
+			writeDebugStreamLine("centerTracker: %d", SensorValue[centerTracker]);
+			writeDebugStreamLine("rightTracker: %d", SensorValue[rightTracker]);
+			finished = true;
+		}
 	}
 }
