@@ -133,39 +133,44 @@ void intersection() {
 
 void lineTracker(){
 	bool finished = false;
-	while (!finished){
-		if (SensorValue[leftTracker] > 2800 && SensorValue[centerTracker] < 2800 && SensorValue[rightTracker] > 2800){
-			motor[rightMotor] = -40;
-			motor[leftMotor] = 40;
+	while (true){
+		if ((SensorValue[leftTracker] > 2800 && SensorValue[centerTracker] < 2800 && SensorValue[rightTracker] > 2800) && finished == false) {
+			clearTimer(T1);
+			motor[rightMotor] = -65;
+			motor[leftMotor] = 55;
 			writeDebugStreamLine("\nMoving Forward");
 			writeDebugStreamLine("leftTracker: %d", SensorValue[leftTracker]);
 			writeDebugStreamLine("centerTracker: %d", SensorValue[centerTracker]);
 			writeDebugStreamLine("rightTracker: %d", SensorValue[rightTracker]);
 		}
-		if ((SensorValue[leftTracker] < 2800 && SensorValue[centerTracker] > 2800 && SensorValue[rightTracker] > 2800) || (SensorValue[leftTracker] < 2800 && SensorValue[centerTracker] < 2800 && SensorValue[rightTracker] > 2800)){
-			motor[rightMotor] = -40;
-			motor[leftMotor] = -40;
+		if ((SensorValue[leftTracker] < 2800 && SensorValue[centerTracker] > 2800 && SensorValue[rightTracker] > 2800) || (SensorValue[leftTracker] < 2800 && SensorValue[centerTracker] < 2800 && SensorValue[rightTracker] > 2800) && finished == false){
+			clearTimer(T1);
+			motor[rightMotor] = -55;
+			motor[leftMotor] = -45
 			writeDebugStreamLine("\nTurning Left");
 			writeDebugStreamLine("leftTracker: %d", SensorValue[leftTracker]);
 			writeDebugStreamLine("centerTracker: %d", SensorValue[centerTracker]);
 			writeDebugStreamLine("rightTracker: %d", SensorValue[rightTracker]);
 		}
-		if ((SensorValue[leftTracker] > 2800 && SensorValue[centerTracker] > 2800 && SensorValue[rightTracker] < 2800) || (SensorValue[leftTracker] > 2800 && SensorValue[centerTracker] < 2800 && SensorValue[rightTracker] < 2800)){
-			motor[rightMotor] = 40;
-			motor[leftMotor] = 40;
+		if ((SensorValue[leftTracker] > 2800 && SensorValue[centerTracker] > 2800 && SensorValue[rightTracker] < 2800) || (SensorValue[leftTracker] > 2800 && SensorValue[centerTracker] < 2800 && SensorValue[rightTracker] < 2800) && finished == false){
+			clearTimer(T1);
+			motor[rightMotor] = 55;
+			motor[leftMotor] = 45;
 			writeDebugStreamLine("\nTurning Right");
 			writeDebugStreamLine("leftTracker: %d", SensorValue[leftTracker]);
 			writeDebugStreamLine("centerTracker: %d", SensorValue[centerTracker]);
 			writeDebugStreamLine("rightTracker: %d", SensorValue[rightTracker]);
 		}
 		if(SensorValue[leftTracker] > 2800 && SensorValue[centerTracker] > 2800 && SensorValue[rightTracker] > 2800){
-			motor[rightMotor] = 0;
-			motor[leftMotor] = 0;
-			writeDebugStreamLine("\nTurning Off");
-			writeDebugStreamLine("leftTracker: %d", SensorValue[leftTracker]);
-			writeDebugStreamLine("centerTracker: %d", SensorValue[centerTracker]);
-			writeDebugStreamLine("rightTracker: %d", SensorValue[rightTracker]);
-			finished = true;
+			if (time1(T1) >= 1000){
+				motor[rightMotor] = 0;
+				motor[leftMotor] = 0;
+				writeDebugStreamLine("\nTurning Off");
+				writeDebugStreamLine("leftTracker: %d", SensorValue[leftTracker]);
+				writeDebugStreamLine("centerTracker: %d", SensorValue[centerTracker]);
+				writeDebugStreamLine("rightTracker: %d", SensorValue[rightTracker]);
+				finished = true;
+			}
 		}
 	}
 }
