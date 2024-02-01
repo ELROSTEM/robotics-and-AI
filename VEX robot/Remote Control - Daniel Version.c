@@ -28,9 +28,9 @@ task main(){
 				circle();
 		else if (vexRT[Btn8L] == 1)  // Does the intersection track
 				intersection();
-		else if (vexRT[Btn8U] == 1)
+		else if (vexRT[Btn8U] == 1 || true)
 				lineTracker();
-		else if (1 == 2){ // Else, uses the remote control
+		else{ // Else, uses the remote control
 			// Sets the slow mode boolean the first time the button is pressed
 			if (vexRT[Btn8R] == 1 && !slowModeButtonPressed) {
 				slowMode = !slowMode;
@@ -59,8 +59,6 @@ task main(){
 			motor[clawMotor] = vexRT[Ch2];
 			motor[armMotor] = vexRT(Btn5U)*127 - vexRT(Btn6U)*127;
 		}
-		else
-			lineTracker();
 	}
 }
 
@@ -136,31 +134,31 @@ void intersection() {
 void lineTracker(){
 	bool finished = false;
 	while (!finished){
-		if(SensorValue[leftTracker] > 2800 && SensorValue[centerTracker] < 2800 && SensorValue[rightTracker] > 2800){
-			motor[rightMotor] = 63;
-			motor[leftMotor] = 63;
+		if (SensorValue[leftTracker] > 2800 && SensorValue[centerTracker] < 2800 && SensorValue[rightTracker] > 2800){
+			motor[rightMotor] = -40;
+			motor[leftMotor] = 40;
 			writeDebugStreamLine("\nMoving Forward");
 			writeDebugStreamLine("leftTracker: %d", SensorValue[leftTracker]);
 			writeDebugStreamLine("centerTracker: %d", SensorValue[centerTracker]);
 			writeDebugStreamLine("rightTracker: %d", SensorValue[rightTracker]);
 		}
-		if(SensorValue[leftTracker] < 2800 && SensorValue[centerTracker] > 2800 && SensorValue[rightTracker] > 2800){
-			motor[rightMotor] = 63;
-			motor[leftMotor] = 0;
+		if ((SensorValue[leftTracker] < 2800 && SensorValue[centerTracker] > 2800 && SensorValue[rightTracker] > 2800) || (SensorValue[leftTracker] < 2800 && SensorValue[centerTracker] < 2800 && SensorValue[rightTracker] > 2800)){
+			motor[rightMotor] = -40;
+			motor[leftMotor] = -40;
 			writeDebugStreamLine("\nTurning Left");
 			writeDebugStreamLine("leftTracker: %d", SensorValue[leftTracker]);
 			writeDebugStreamLine("centerTracker: %d", SensorValue[centerTracker]);
 			writeDebugStreamLine("rightTracker: %d", SensorValue[rightTracker]);
 		}
-		if(SensorValue[leftTracker] > 2800 && SensorValue[centerTracker] > 2800 && SensorValue[rightTracker] < 2800){
-			motor[rightMotor] = 0;
-			motor[leftMotor] = 63;
+		if ((SensorValue[leftTracker] > 2800 && SensorValue[centerTracker] > 2800 && SensorValue[rightTracker] < 2800) || (SensorValue[leftTracker] > 2800 && SensorValue[centerTracker] < 2800 && SensorValue[rightTracker] < 2800)){
+			motor[rightMotor] = 40;
+			motor[leftMotor] = 40;
 			writeDebugStreamLine("\nTurning Right");
 			writeDebugStreamLine("leftTracker: %d", SensorValue[leftTracker]);
 			writeDebugStreamLine("centerTracker: %d", SensorValue[centerTracker]);
 			writeDebugStreamLine("rightTracker: %d", SensorValue[rightTracker]);
 		}
-		while(SensorValue[leftTracker] > 2800 && SensorValue[centerTracker] > 2800 && SensorValue[rightTracker] > 2800){
+		if(SensorValue[leftTracker] > 2800 && SensorValue[centerTracker] > 2800 && SensorValue[rightTracker] > 2800){
 			motor[rightMotor] = 0;
 			motor[leftMotor] = 0;
 			writeDebugStreamLine("\nTurning Off");
