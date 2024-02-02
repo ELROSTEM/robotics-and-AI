@@ -136,8 +136,8 @@ void lineTracker(){
 	while (true){
 		if ((SensorValue[leftTracker] > 2800 && SensorValue[centerTracker] < 2800 && SensorValue[rightTracker] > 2800) && finished == false) {
 			clearTimer(T1);
-			motor[rightMotor] = -65;
-			motor[leftMotor] = 55;
+			motor[rightMotor] = -60;
+			motor[leftMotor] = 60;
 			writeDebugStreamLine("\nMoving Forward");
 			writeDebugStreamLine("leftTracker: %d", SensorValue[leftTracker]);
 			writeDebugStreamLine("centerTracker: %d", SensorValue[centerTracker]);
@@ -145,8 +145,8 @@ void lineTracker(){
 		}
 		if ((SensorValue[leftTracker] < 2800 && SensorValue[centerTracker] > 2800 && SensorValue[rightTracker] > 2800) || (SensorValue[leftTracker] < 2800 && SensorValue[centerTracker] < 2800 && SensorValue[rightTracker] > 2800) && finished == false){
 			clearTimer(T1);
-			motor[rightMotor] = -55;
-			motor[leftMotor] = -45
+			motor[rightMotor] = -80;
+			motor[leftMotor] = -80;
 			writeDebugStreamLine("\nTurning Left");
 			writeDebugStreamLine("leftTracker: %d", SensorValue[leftTracker]);
 			writeDebugStreamLine("centerTracker: %d", SensorValue[centerTracker]);
@@ -154,8 +154,8 @@ void lineTracker(){
 		}
 		if ((SensorValue[leftTracker] > 2800 && SensorValue[centerTracker] > 2800 && SensorValue[rightTracker] < 2800) || (SensorValue[leftTracker] > 2800 && SensorValue[centerTracker] < 2800 && SensorValue[rightTracker] < 2800) && finished == false){
 			clearTimer(T1);
-			motor[rightMotor] = 55;
-			motor[leftMotor] = 45;
+			motor[rightMotor] = 80;
+			motor[leftMotor] = 80;
 			writeDebugStreamLine("\nTurning Right");
 			writeDebugStreamLine("leftTracker: %d", SensorValue[leftTracker]);
 			writeDebugStreamLine("centerTracker: %d", SensorValue[centerTracker]);
