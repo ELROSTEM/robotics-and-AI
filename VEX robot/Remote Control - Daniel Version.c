@@ -15,9 +15,12 @@
 void circle();
 void turn(int times);
 void forward(int segments);
+void backward(int segments);
 void intersection();
 void lineTracker();
 void autoPark();
+void parallelPark();
+void goAround();
 
 task main(){
 	int drive, turn, leftSpeed, rightSpeed;
@@ -76,21 +79,6 @@ void circle() {
 	motor[rightMotor] = 0;
 	motor[leftMotor] = 0;
 }
-/*void turn(bool turnLeft, int times){
-	if (turnLeft) {
-		motor[rightMotor] = -127;
-		motor[leftMotor] = 0;
-	} else {
-		motor[rightMotor] = 0;
-		motor[leftMotor] = 127;
-	}
-	if (times == 1) {
-		wait1Msec(750);
-	}
-	wait1Msec(540 * times);
-	motor[rightMotor] = 0;
-	motor[leftMotor] = 0;
-} */
 
 void turn(int times) {
 	motor[rightMotor] = -127;
@@ -108,6 +96,14 @@ void turn(int times) {
 void forward(int segments) {
 	motor[rightMotor] = -127;
 	motor[leftMotor] = 127 * .45;
+	wait1Msec(1000 * segments);
+	motor[rightMotor] = 0;
+	motor[leftMotor] = 0;
+}
+
+void backward(int segments) {
+	motor[rightMotor] = 127;
+	motor[leftMotor] = -127 * .45;
 	wait1Msec(1000 * segments);
 	motor[rightMotor] = 0;
 	motor[leftMotor] = 0;
@@ -179,5 +175,69 @@ void lineTracker(){
 }
 
 void autoPark(){
+	tryingToPark = True;
+	waitingForObstacle = False;
+	gapTimerOn = False;
+	minGapTime = 1000;
+	firstGapLoop = True;
+	while tryingToPark() {
+		// If there is a block in front
+		if (SensorValue(frontSonar) < 20) {
+			// If this was the firt iteration that this block was in front, start timer
+			if (waitingForObstacle == False) {
+				clearTimer(T1);
+				waitingForObstacle = True;
+				gapTimerOn = False;
+			}
+			// If this was not the first iteraton, check if it has been 3 seconds since it started
+			if (waitingForObstacle) {
+				if (time1(T1) > 3000)	{
+					goAround();
+					waitingForObstacle = False;
+				}
+			}
+		}
+		// If thee is no car in front, check the right sensor
+		else if (SensorValue(rightSonar) < 20) {
+			// If the orbot previously saw a gap
+			if (gapTimerOn) {
+				// Means there was a gap and this statement checks if it is a good size
+				if (time1(T2) > minGapTime) {
+					// If it is a good size, park and exit out of this loop
+					parallelPark();
+					tryingToPark = False;
+					break
+				}
+			}
+			// If there was not a gap previously, it just goes forward looking for one
+			forward();
+		}
+		// This else activates if there is no block in front or on the side (free space)
+		else {
+			// If this was the first gap since obstacle
+			if (firstGapLoop) {
+				clearTimer(T2);
+				forward();
+			}
+			else if (firstGapLoop == False) {
+				forward();
+			}
+		}
+	}
 	writeDebugStream("%d\n",SensorValue(rightTracker);
+}
+
+void parallelPark() {
+	backward();
+	right();
+	forward();
+	left();
+}
+
+void goAround() {
+	left();
+	forward();
+	right();
+	forward();
+	left();
 }
