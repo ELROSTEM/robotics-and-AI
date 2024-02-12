@@ -175,69 +175,79 @@ void lineTracker(){
 }
 
 void autoPark(){
-	tryingToPark = True;
-	waitingForObstacle = False;
-	gapTimerOn = False;
-	minGapTime = 1000;
-	firstGapLoop = True;
-	while tryingToPark() {
+	bool tryingToPark = true;
+	bool waitingForObstacle = false;
+	bool gapTimerOn = false;
+	int minGapTime = 1000;
+	bool firstGapLoop = true;
+	while (tryingToPark) {
 		// If there is a block in front
 		if (SensorValue(frontSonar) < 20) {
+			writeDebugStream("Obstacle in front");
 			// If this was the firt iteration that this block was in front, start timer
-			if (waitingForObstacle == False) {
+			if (waitingForObstacle == false) {
+				writeDebugStream("Starting timer");
 				clearTimer(T1);
-				waitingForObstacle = True;
-				gapTimerOn = False;
+				waitingForObstacle = true;
+				gapTimerOn = false;
 			}
 			// If this was not the first iteraton, check if it has been 3 seconds since it started
 			if (waitingForObstacle) {
 				if (time1(T1) > 3000)	{
+					writeDebugStream("Going Around");
 					goAround();
-					waitingForObstacle = False;
+					waitingForObstacle = false;
 				}
+				writeDebugStream("Wait time elapsed: %d", time1(T1));
 			}
 		}
 		// If thee is no car in front, check the right sensor
 		else if (SensorValue(rightSonar) < 20) {
+			writeDebugStream("Car to right");
+			firstGapLoop = true;
 			// If the orbot previously saw a gap
 			if (gapTimerOn) {
 				// Means there was a gap and this statement checks if it is a good size
 				if (time1(T2) > minGapTime) {
 					// If it is a good size, park and exit out of this loop
+					writeDebugStream("Trying to park");
 					parallelPark();
-					tryingToPark = False;
+					tryingToPark = false;
 					break
 				}
+				writeDebugStream("Gap is not large enough");
 			}
 			// If there was not a gap previously, it just goes forward looking for one
-			forward();
+			forward(10);
 		}
 		// This else activates if there is no block in front or on the side (free space)
 		else {
 			// If this was the first gap since obstacle
 			if (firstGapLoop) {
+				writeDebugStream("Start of gap to right");
 				clearTimer(T2);
-				forward();
+				firstGapLoop = false;
+				forward(10);
 			}
-			else if (firstGapLoop == False) {
-				forward();
+			else if (firstGapLoop == false) {
+				writeDebugStream("Gap to right is continuing");
+				forward(10);
 			}
 		}
-	}
-	writeDebugStream("%d\n",SensorValue(rightTracker);
+	} //writeDebugStream("%d\n",SensorValue(rightTracker);
 }
 
 void parallelPark() {
-	backward();
-	right();
-	forward();
-	left();
+	backward(10);
+	right(1);
+	forward(10);
+	left(1);
 }
 
 void goAround() {
-	left();
-	forward();
-	right();
-	forward();
-	left();
+	left(1);
+	forward(10);
+	right(1);
+	forward(10);
+	left(1);
 }
