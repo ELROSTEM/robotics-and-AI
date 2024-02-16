@@ -6,7 +6,7 @@
 #pragma config(Sensor, dgtl1,  leftSonar,               sensorSONAR_cm)
 #pragma config(Sensor, dgtl6,  frontSonar,               sensorSONAR_cm)
 #pragma config(Sensor, dgtl11, rightSonar,               sensorSONAR_cm)
-#pragma config(Motor,  port5,           leftMotor,     tmotorVex269_MC29, openLoop)
+#pragma config(Motor,  port5,           leftMotor,     tmotorVex393_MC29, openLoop)
 #pragma config(Motor,  port6,           clawMotor,     tmotorVex393_MC29, openLoop)
 #pragma config(Motor,  port7,           armMotor,      tmotorVex393_MC29, openLoop)
 #pragma config(Motor,  port8,           rightMotor,    tmotorVex393_MC29, openLoop)
@@ -152,13 +152,14 @@ void autoPark(){
 	bool gapTimerOn = false;
 	int minGapTime = 500;
 	bool firstGapLoop = true;
+	clearTimer(T2);
 	while (tryingToPark) {
 		// If there is a block in front
 		if (SensorValue(frontSonar) < 20) {
-			writeDebugStream("Obstacle in front");
+			writeDebugStream("Obstacle in front\n");
 			// If this was the firt iteration that this block was in front, start timer
 			if (waitingForObstacle == false) {
-				writeDebugStream("Starting timer");
+				writeDebugStream("Starting timer\n");
 				clearTimer(T1);
 				waitingForObstacle = true;
 				gapTimerOn = false;
@@ -166,44 +167,50 @@ void autoPark(){
 			// If this was not the first iteraton, check if it has been 3 seconds since it started
 			if (waitingForObstacle) {
 				if (time1(T1) > 3000)	{
-					writeDebugStream("Going Around");
+					writeDebugStream("Going Around\n");
 					goAround();
 					waitingForObstacle = false;
 				}
-				writeDebugStream("Wait time elapsed: %d", time1(T1));
+				writeDebugStream("Wait time elapsed: %d\n", time1(T1));
 			}
 		}
 		// If thee is no car in front, check the right sensor
 		else if (SensorValue(rightSonar) < 20) {
-			writeDebugStream("Car to right");
+			writeDebugStream("Car to right\n");
+			writeDebugStream("Timer: %d\n", time1(T2));
+			writeDebugStream("GapTimer: %d\n", gapTimerOn);
 			firstGapLoop = true;
 			// If the orbot previously saw a gap
 			if (gapTimerOn) {
 				// Means there was a gap and this statement checks if it is a good size
 				if (time1(T2) > minGapTime) {
 					// If it is a good size, park and exit out of this loop
-					writeDebugStream("Trying to park");
+					writeDebugStream("Trying to park\n");
 					parallelPark();
 					tryingToPark = false;
 					break;
 				}
-				writeDebugStream("Gap is not large enough");
+				writeDebugStream("Gap is not large enough\n");
 			}
 			// If there was not a gap previously, it just goes forward looking for one
-				forward(10);
+				forward(0);
+				gapTimerOn = false;
 		}
 		// This else activates if there is no block in front or on the side (free space)
 		else {
 			// If this was the first gap since obstacle
 			if (firstGapLoop) {
-				writeDebugStream("Start of gap to right");
+				writeDebugStream("Start of gap to right\n");
 				clearTimer(T2);
 				firstGapLoop = false;
-				forward(10);
+				gapTimerOn = true;
+				forward(0);
 			}
 			else if (firstGapLoop == false) {
-				writeDebugStream("Gap to right is continuing");
-				forward(10);
+				writeDebugStream("Gap to right is continuing\n");
+				writeDebugStream("GapTimer: %d\n", gapTimerOn);
+				writeDebugStream("Timer: %d\n", time1(T2));
+				forward(0);
 			}
 		}
 	} //writeDebugStream("%d\n",SensorValue(rightTracker);
@@ -229,13 +236,13 @@ void forward(int segments) {
 		motor[rightMotor] = 40;
 		motor[leftMotor] = 40;
 	} else {
-		motor[rightMotor] = 40;
-		motor[leftMotor] = 40;
+		motor[rightMotor] = 127;
+		motor[leftMotor] = 127;
 		wait1Msec(1000 * segments);
 		motor[rightMotor] = 0;
 		motor[leftMotor] = 0;
 	}
-	writeDebugStream("Moving Forward");
+	writeDebugStream("Moving Forward\n\n");
 }
 
 void backward(int segments) {
@@ -245,29 +252,19 @@ void backward(int segments) {
 }
 
 void right(int times) {
-		motor[rightMotor] = -40;
-		motor[leftMotor] = 40;
-		if (times == 1) {
-			wait1Msec(340);
-		}
-		else if (times == 2) {
-			wait1Msec(352 * 2);
-		}
-		motor[rightMotor] = 0;
-		motor[leftMotor] = 0;
-	writeDebugStream("Turned Right");
+	clearTimer(T3):
+	while (time1(T3) < 340*times){
+		motor[rightMotor] = -127;
+		motor[leftMotor] = 127;
+	}
+	writeDebugStream("Turned Right\n\n");
 }
 
 void left(int times) {
-		motor[rightMotor] = 40;
-		motor[leftMotor] = -40;
-		if (times == 1) {
-			wait1Msec(340);
-		}
-		else if (times == 2) {
-			wait1Msec(352 * 2);
-		}
-		motor[rightMotor] = 0;
-		motor[leftMotor] = 0;
-	writeDebugStream("Turned Left");
+	clearTimer(T3):
+	while (time1(T3) < 340*times){
+		motor[rightMotor] = -127;
+		motor[leftMotor] = 127;
+	}
+	writeDebugStream("Turned Left\n\n");
 }
