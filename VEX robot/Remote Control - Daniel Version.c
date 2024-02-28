@@ -41,6 +41,10 @@ task main(){
 		else if (vexRT[Btn8U] == 1)
 				lineTracker();
 		else if (vexRT[Btn7D] == 1 || true){
+			//left(1);
+			//wait1Msec(1000);
+			//right(1);
+			//wait1Msec(1000);
 			autoPark();
 		}
 		else{ // Else, uses the remote control
@@ -208,11 +212,11 @@ void parallelPark() {
 
 void goAround() {
 	left(1);
-	forward(40, 1.5);
+	forward(40, 2);
 	right(1);
-	forward(40, 4);
+	forward(40, 6);
 	right(1);
-	forward(40, 1.5);
+	forward(40, 2);
 	left(1);
 	writeDebugStream("Done going around\n");
 }
@@ -223,7 +227,7 @@ void forward(int motorSpeed, float segments) {
 		motor[leftMotor] = motorSpeed * .9;
 	} else {
 		motor[rightMotor] = motorSpeed;
-		motor[leftMotor] = motorSpeed;
+		motor[leftMotor] = motorSpeed *.9;
 		wait1Msec(1000 * segments);
 		motor[rightMotor] = 0;
 		motor[leftMotor] = 0;
@@ -242,8 +246,8 @@ void backward(int segments) {
 void right(int times) {
 	clearTimer(T3);
 	while (time1(T3) < 800*times){
-		motor[rightMotor] = -60;
-		motor[leftMotor] = 60;
+		motor[rightMotor] = -55;
+		motor[leftMotor] = 55;
 	}
 	motor[rightMotor] = 0;
 	motor[leftMotor] = 0;
