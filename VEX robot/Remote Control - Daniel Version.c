@@ -205,8 +205,8 @@ void autoPark(){
 
 void parallelPark() {
 	backward(1);
-	right(1);
-	forward(60, 1.25);
+	right(1.4); // 1
+	forward(60, 2.5); // 1.25
 	left(1);
 }
 
@@ -214,10 +214,10 @@ void goAround() {
 	writeDebugStream("Going around\n");
 	left(1.1);
 	forward(60, 1);
-	right(1);
+	right(1.1);
 	forward(60, 3.5);
 	right(1);
-	forward(60, 1);
+	forward(60, 1.4);
 	left(1.1);
 	writeDebugStream("Done going around\n");
 }
