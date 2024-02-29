@@ -15,8 +15,8 @@
 void circle();
 void forward(int motorSpeed, float segments);
 void backward(int segments);
-void right(int times);
-void left(int times);
+void right(float times);
+void left(float times);
 void intersection();
 void lineTracker();
 void autoPark();
@@ -155,11 +155,11 @@ void lineTracker(){
 void autoPark(){
 	bool waitingForObstacle = false;
 	bool gapTimerOn = false;
-	int minGapTime = 1700;
+	int minGapTime = 1500;
 	clearTimer(T2);
 	while (!parked) {
 		// If there is a block in front
-		if (SensorValue(frontSonar) < 40) {
+		if (SensorValue(frontSonar) < 25) {
 			writeDebugStream("Obstacle in front\n");
 			motor[rightMotor] = 0;
 			motor[leftMotor] = 0;
@@ -185,7 +185,7 @@ void autoPark(){
 		else if (SensorValue(rightSonar) < 20 && SensorValue(rightSonar) != -1) {
 			writeDebugStream("Car to right\n");
 			clearTimer(T2);
-			forward(40, 0);
+			forward(60, 0);
 		}
 		// This else activates if there is no block in front or on the side (free space)
 		else {
@@ -197,7 +197,7 @@ void autoPark(){
 			}
 			else {
 				writeDebugStream("Gap too small. Continuing\n");
-				forward(40, 0);
+				forward(60, 0);
 			}
 		}
 	} //writeDebugStream("%d\n",SensorValue(rightTracker);
@@ -206,28 +206,29 @@ void autoPark(){
 void parallelPark() {
 	backward(1);
 	right(1);
-	forward(40, 4);
+	forward(60, 1.25);
 	left(1);
 }
 
 void goAround() {
-	left(1);
-	forward(40, 2);
+	writeDebugStream("Going around\n");
+	left(1.1);
+	forward(60, 1);
 	right(1);
-	forward(40, 6);
+	forward(60, 3.5);
 	right(1);
-	forward(40, 2);
-	left(1);
+	forward(60, 1);
+	left(1.1);
 	writeDebugStream("Done going around\n");
 }
 
 void forward(int motorSpeed, float segments) {
 	if (segments == 0){
 		motor[rightMotor] = motorSpeed;
-		motor[leftMotor] = motorSpeed * .9;
+		motor[leftMotor] = motorSpeed * .7;
 	} else {
 		motor[rightMotor] = motorSpeed;
-		motor[leftMotor] = motorSpeed *.9;
+		motor[leftMotor] = motorSpeed *.7;
 		wait1Msec(1000 * segments);
 		motor[rightMotor] = 0;
 		motor[leftMotor] = 0;
@@ -243,9 +244,9 @@ void backward(int segments) {
 	motor[leftMotor] = 0;
 }
 
-void right(int times) {
+void right(float times) {
 	clearTimer(T3);
-	while (time1(T3) < 800*times){
+	while (time1(T3) < 1000*times){
 		motor[rightMotor] = -55;
 		motor[leftMotor] = 55;
 	}
@@ -254,7 +255,7 @@ void right(int times) {
 	writeDebugStream("Turned Right\n\n");
 }
 
-void left(int times) {
+void left(float times) {
 	clearTimer(T3);
 	while (time1(T3) < 1000*times){
 		motor[rightMotor] = 60;
