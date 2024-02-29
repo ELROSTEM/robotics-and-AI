@@ -38,13 +38,10 @@ task main(){
 				circle();
 		else if (vexRT[Btn8L] == 1)  // Does the intersection track
 				intersection();
-		else if (vexRT[Btn8U] == 1)
+		else if (vexRT[Btn8U] == 1) // Follows the orange line
 				lineTracker();
+		// This is for parallel parking. It is set to always go to this if statement for ease of use
 		else if (vexRT[Btn7D] == 1 || true){
-			//left(1);
-			//wait1Msec(1000);
-			//right(1);
-			//wait1Msec(1000);
 			autoPark();
 		}
 		else{ // Else, uses the remote control
@@ -79,6 +76,7 @@ task main(){
 	}
 }
 
+// Code to follow the orange circle on the ground
 void circle() {
 	motor[rightMotor] = -31;
 	motor[leftMotor] = 127;
@@ -87,6 +85,7 @@ void circle() {
 	motor[leftMotor] = 0;
 }
 
+// Code to follow the orange interesction on the ground
 void intersection() {
 	forward(127, 2);
 	wait1Msec(300);
@@ -112,7 +111,9 @@ void intersection() {
 	wait1Msec(100);
 }
 
+// Code to follow the orange line on the ground
 void lineTracker(){
+	// Going forward
 	if (SensorValue[leftTracker] > 2800 && SensorValue[centerTracker] < 2800 && SensorValue[rightTracker] > 2800) {
 		clearTimer(T1);
 		motor[rightMotor] = 80;
@@ -122,6 +123,7 @@ void lineTracker(){
 		writeDebugStreamLine("centerTracker: %d", SensorValue[centerTracker]);
 		writeDebugStreamLine("rightTracker: %d", SensorValue[rightTracker]);
 	}
+	// Turning left
 	if ((SensorValue[leftTracker] < 2800 && SensorValue[centerTracker] > 2800 && SensorValue[rightTracker] > 2800) || (SensorValue[leftTracker] < 2800 && SensorValue[centerTracker] < 2800 && SensorValue[rightTracker] > 2800)){
 		clearTimer(T1);
 		motor[rightMotor] = 127;
@@ -131,6 +133,7 @@ void lineTracker(){
 		writeDebugStreamLine("centerTracker: %d", SensorValue[centerTracker]);
 		writeDebugStreamLine("rightTracker: %d", SensorValue[rightTracker]);
 	}
+	// Turning right
 	if ((SensorValue[leftTracker] > 2800 && SensorValue[centerTracker] > 2800 && SensorValue[rightTracker] < 2800) || (SensorValue[leftTracker] > 2800 && SensorValue[centerTracker] < 2800 && SensorValue[rightTracker] < 2800)){
 		clearTimer(T1);
 		motor[rightMotor] = -50;
@@ -140,6 +143,7 @@ void lineTracker(){
 		writeDebugStreamLine("centerTracker: %d", SensorValue[centerTracker]);
 		writeDebugStreamLine("rightTracker: %d", SensorValue[rightTracker]);
 	}
+	// Stopping at the end
 	if(SensorValue[leftTracker] > 2800 && SensorValue[centerTracker] > 2800 && SensorValue[rightTracker] > 2800){
 		if (time1(T1) >= 1000){
 			motor[rightMotor] = 0;
@@ -152,6 +156,7 @@ void lineTracker(){
 	}
 }
 
+// Parallel parking code
 void autoPark(){
 	bool waitingForObstacle = false;
 	bool gapTimerOn = false;
@@ -177,6 +182,7 @@ void autoPark(){
 					goAround();
 					waitingForObstacle = false;
 					clearTimer(T2);
+					clearTimer(T1);
 				}
 				writeDebugStream("Wait time elapsed: %d\n", time1(T1));
 			}
@@ -200,16 +206,18 @@ void autoPark(){
 				forward(60, 0);
 			}
 		}
-	} //writeDebugStream("%d\n",SensorValue(rightTracker);
+	}
 }
 
+// Code to actually execute the parallel park
 void parallelPark() {
 	backward(1);
-	right(1.4); // 1
-	forward(60, 2.5); // 1.25
+	right(1.4);
+	forward(60, 2.5);
 	left(1);
 }
 
+// Code to go around if there is an obstacle in front
 void goAround() {
 	writeDebugStream("Going around\n");
 	left(1.1);
@@ -222,10 +230,13 @@ void goAround() {
 	writeDebugStream("Done going around\n");
 }
 
+// Moves the robot forward
 void forward(int motorSpeed, float segments) {
+	// If the segments argument is 0, go forward indefinitely
 	if (segments == 0){
 		motor[rightMotor] = motorSpeed;
 		motor[leftMotor] = motorSpeed * .7;
+	// Else, go the specified number of segments
 	} else {
 		motor[rightMotor] = motorSpeed;
 		motor[leftMotor] = motorSpeed *.7;
@@ -236,6 +247,7 @@ void forward(int motorSpeed, float segments) {
 	writeDebugStream("Moving Forward\n\n");
 }
 
+// Moves the robot backward
 void backward(int segments) {
 	motor[rightMotor] = -40;
 	motor[leftMotor] = -40;
@@ -244,6 +256,7 @@ void backward(int segments) {
 	motor[leftMotor] = 0;
 }
 
+// Turns the robot right
 void right(float times) {
 	clearTimer(T3);
 	while (time1(T3) < 1000*times){
@@ -255,6 +268,7 @@ void right(float times) {
 	writeDebugStream("Turned Right\n\n");
 }
 
+// Turns the robot left
 void left(float times) {
 	clearTimer(T3);
 	while (time1(T3) < 1000*times){
