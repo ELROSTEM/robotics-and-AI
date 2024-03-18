@@ -1,5 +1,5 @@
 % Read the video and start a video player
-videoFReader = vision.VideoFileReader("roadtrip1.mov");		
+videoFReader = vision.VideoFileReader("roadtrip2.mov");		
 videoPlayer = vision.VideoPlayer; 
 
 % Start looping through each video frame until the video is done
@@ -7,7 +7,6 @@ frameNum = 0;
 %v = VideoWriter("export","Archival");
 %open(v)
 while ~isDone(videoFReader)
-    close all
     videoFrame = videoFReader();
     % Initial crop
     imageSize = size(videoFrame);
@@ -26,40 +25,27 @@ while ~isDone(videoFReader)
     % Hough transform
     xy = houghTransform(imageBWMasked, 16); % 2nd arg is noLines
     xy = rmmissing(xy);
+    xy = convertToOriginal(xy, cropRect);
 
-    %polygon = [];
-    %vertices_x = [];
-    %vertices_y = [];
-    %xySize = size(xy);
-    %for k = 1:xySize(1) % Loops through every line
-        %vertices_x = [vertices_x, xy(1), xy(3)];
-        %vertices_y = [vertices_y, xy(2), xy(4)];
-        %polygon = [polygon, xy(k, :)];
-        %end
-    %end
-    %polygon_points = reshape([vertices_x; vertices_y], 1, []);
-
+    % Create the polygon
+    vertices_x = [];
+    vertices_y = [];
     xySize = size(xy); 
     polygon = [];
     for k = 1:xySize(1)
-        vertices_x = [vertices_x, xy(1), xy(3)];
-        vertices_y = [vertices_y, xy(2), xy(4)];
-        polygon = [polygon, xy(k, :)];
+        vertices_x = [vertices_x, xy(k,1), xy(k,3)];
+        vertices_y = [vertices_y, xy(k,2), xy(k,4)];
     end
-    newX = [];
-    newY = [];
-    newX, newY = sortPolygonVertices(vertices_x, vertices_y);
-    polygon_points = [newX, newY];
+
+    [newX, newY] = sortPolygonVertices(vertices_x, vertices_y);
+    polygon = reshape([newX; newY], 1, []);
 
     % Draw the image
     LaneID = insertShape(croppedVidFrame,'line',xy,'LineWidth',2, 'Color','red');
-    %LaneID = insertShape(LaneID, 'filled-polygon', polygon, ShapeColor=["white"],Opacity=0.7);
-    LaneID = insertShape(LaneID, 'polygon', polygon_points, 'LineWidth', 5);
+    LaneID = insertShape(LaneID, 'filled-polygon', polygon, ShapeColor=["white"],Opacity=0.7);
 
-    %imshow(LaneID); 
     videoPlayer(LaneID)
     %writeVideo(v,LaneID)
-    %pause(.2)
 end
 close(v)
 
@@ -76,7 +62,7 @@ function outputImg = makeMask(inputImg)
     %Create ROI mask
     cropSize = size(inputImg);
     % Row and column go with each other and correspond to a coordinate
-    row = [cropSize(1) cropSize(1)*.7 cropSize(1)*0.25 cropSize(1)*0.25 cropSize(1)*.9 cropSize(1) cropSize(1)];
+    row = [cropSize(1) cropSize(1)*.7 cropSize(1)*0.2 cropSize(1)*0.2 cropSize(1)*.9 cropSize(1) cropSize(1)];
     col = [0           0              cropSize(2)*.5    cropSize(2)*.5      cropSize(2)    cropSize(2) 0];
     outputImg = roipoly(inputImg, col, row);    
 end
@@ -120,10 +106,10 @@ function output = findPoints(inputImg, xy)
     end
 end
 
-function [sorted_x, sorted_y] = sortPolygonVertices(x, y)
+function [x, y] = sortPolygonVertices(x, y)
     % Find the unweighted mean of the vertices  :  
     cx = mean(x);
-    cy = mean(y;)
+    cy = mean(y);
     
     % Find the angles:
     a = atan2(y - cy, x - cx);
@@ -132,6 +118,10 @@ function [sorted_x, sorted_y] = sortPolygonVertices(x, y)
     [~, order] = sort(a);
     
     % Sort the x and y coordinates
-    sorted_x = x(sortOrder);
-    sorted_y = y(sortOrder);
+    x = x(order);
+    y = y(order);
+end
+
+function convertToOriginal(xy, cropRect)
+
 end
