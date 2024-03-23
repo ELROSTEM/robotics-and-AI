@@ -1,11 +1,11 @@
 % Read the video and start a video player
-videoFReader = vision.VideoFileReader("roadtrip1.mov");		
+videoFReader = vision.VideoFileReader("roadtrip2.mov");		
 videoPlayer = vision.VideoPlayer; 
 
 % Start looping through each video frame until the video is done
 frameNum = 0;
-%v = VideoWriter("export","Archival");
-%open(v)
+v = VideoWriter("export","MPEG-4");
+open(v)
 while ~isDone(videoFReader)
     videoFrame = videoFReader();
     % Initial crop
@@ -45,7 +45,7 @@ while ~isDone(videoFReader)
     LaneID = insertShape(LaneID, 'filled-polygon', polygon, ShapeColor=["white"],Opacity=0.7);
 
     videoPlayer(LaneID)
-    %writeVideo(v,LaneID)
+    writeVideo(v,LaneID)
 end
 close(v)
 
@@ -62,7 +62,7 @@ function outputImg = makeMask(inputImg)
     %Create ROI mask
     cropSize = size(inputImg);
     % Row and column go with each other and correspond to a coordinate
-    row = [cropSize(1) cropSize(1)*.7 cropSize(1)*0.2 cropSize(1)*0.2 cropSize(1)*.9 cropSize(1) cropSize(1)];
+    row = [cropSize(1) cropSize(1)*.7 cropSize(1)*0.25 cropSize(1)*0.25 cropSize(1)*.9 cropSize(1) cropSize(1)];
     col = [0           0              cropSize(2)*.5    cropSize(2)*.5      cropSize(2)    cropSize(2) 0];
     outputImg = roipoly(inputImg, col, row);    
 end
